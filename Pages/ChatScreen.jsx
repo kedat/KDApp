@@ -15,16 +15,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 CHAT_BOT_FACE =
   "https://res.cloudinary.com/dknvsbuyy/image/upload/v1685678135/chat_1_c7eda483e3.png";
-baseUrl = "https://f01e-2402-800-61f8-ea23-28c0-825-546d-7c52.ngrok-free.app";
+baseUrl = "https://43d7-2402-800-61f8-3861-6074-31a5-cd6d-e526.ngrok-free.app";
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chatFaceColor, setChatFaceColor] = useState();
-  const [botId, setBotId] = useState(ChatFaceData[0].id);
+  const [botId, setBotId] = useState("");
 
   useEffect(() => {
     checkFaceId();
-  }, []);
+  }, [botId]);
 
   const checkFaceId = async () => {
     const id = await AsyncStorage.getItem("chatFaceId");
@@ -34,7 +34,7 @@ export default function ChatScreen() {
     setMessages([
       {
         _id: 1,
-        text: "Xin chào, tôi có thể giúp gì cho bạn?",
+        text: `Xin chào, tôi thuộc ${ChatFaceData[id]?.name} có thể giúp gì cho bạn?`,
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -45,54 +45,61 @@ export default function ChatScreen() {
     ]);
   };
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    if (messages[0].text) {
-      getResponse(messages[0].text);
-    }
-  }, []);
+  const onSend = useCallback(
+    (messages = []) => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, messages)
+      );
+      if (messages[0].text) {
+        getResponse(messages[0].text);
+      }
+    },
+    [botId]
+  );
 
-  const getResponse = async (msg) => {
-    setLoading(true);
-    try {
+  const getResponse = useCallback(
+    async (msg) => {
       setLoading(true);
-      await fetch(`${baseUrl}/chat/chat_with_documents`, {
-        method: "POST",
-        mode: "cors",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bot_id: "ktcn",
-          question: msg,
-        }),
-      })
-        .then((res) => {
-          return res.json();
+      try {
+        setLoading(true);
+        await fetch(`${baseUrl}/chat/chat_with_documents`, {
+          method: "POST",
+          mode: "cors",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bot_id: botId,
+            question: msg,
+          }),
         })
-        .then((data) => {
-          const chatAIResp = {
-            _id: Math.random() * (9999999 - 1),
-            text: data.answer.output_text,
-            createdAt: new Date(),
-            user: {
-              _id: 2,
-              name: "React Native",
-              avatar: CHAT_BOT_FACE,
-            },
-          };
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, chatAIResp)
-          );
-          setLoading(false);
-        });
-    } catch (error) {
-      setLoading(false);
-    }
-  };
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            const chatAIResp = {
+              _id: Math.random() * (9999999 - 1),
+              text: data.answer.output_text,
+              createdAt: new Date(),
+              user: {
+                _id: 2,
+                name: "React Native",
+                avatar: CHAT_BOT_FACE,
+              },
+            };
+            setMessages((previousMessages) =>
+              GiftedChat.append(previousMessages, chatAIResp)
+            );
+            setLoading(false);
+          });
+      } catch (error) {
+        console.log("🚀 ~ getResponse ~ error:", error);
+        setLoading(false);
+      }
+    },
+    [botId]
+  );
 
   const renderBubble = (props) => {
     return (

@@ -26,15 +26,45 @@ export default function HomeScreen() {
       ? setSelectedChatFace(ChatFaceData[id])
       : setSelectedChatFace(ChatFaceData[0]);
   };
+  baseUrl =
+    "https://43d7-2402-800-61f8-3861-6074-31a5-cd6d-e526.ngrok-free.app";
 
+  const [loading, setLoading] = useState(false);
   const onChatFacePress = async (id) => {
     setSelectedChatFace(ChatFaceData[id - 1]);
+
     await AsyncStorage.setItem("chatFaceId", (id - 1).toString());
+    setLoading(true);
+
+    try {
+      await fetch(`${baseUrl}/chat/choose_bot`, {
+        method: "POST",
+        mode: "cors",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bot_id: ChatFaceData[id - 1].bot_id,
+        }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          setLoading(false);
+
+          console.log(data);
+        });
+    } catch (error) {
+      console.log("🚀 ~ onChatFacePress ~ error:", error);
+      setLoading(false);
+    }
   };
   return (
     <View style={{ alignItems: "center", paddingTop: 90 }}>
       <Text style={[{ color: selectedChatFace?.primary }, { fontSize: 30 }]}>
-        Hello,
+        Chào mừng đến với
       </Text>
       <Text
         style={[
@@ -48,7 +78,7 @@ export default function HomeScreen() {
         source={{ uri: selectedChatFace.image }}
         style={{ height: 150, width: 150, marginTop: 20 }}
       />
-      <Text style={{ marginTop: 30, fontSize: 25 }}>How Can I help you?</Text>
+      {/* <Text style={{ marginTop: 30, fontSize: 25 }}>How Can I help you?</Text> */}
 
       <View
         style={{
@@ -68,6 +98,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 style={{ margin: 15 }}
                 onPress={() => onChatFacePress(item.id)}
+                disabled={loading}
               >
                 <Image
                   source={{ uri: item.image }}
@@ -78,7 +109,9 @@ export default function HomeScreen() {
           }
         />
         <Text style={{ marginTop: 5, fontSize: 17, color: "#B0B0B0" }}>
-          Chọn chat bot để bắt đầu
+          {loading
+            ? "Đang chuẩn bị dữ liệu, vui lòng chờ"
+            : "Chọn chat bot để bắt đầu"}
         </Text>
       </View>
       <TouchableOpacity
@@ -93,6 +126,7 @@ export default function HomeScreen() {
           },
         ]}
         onPress={() => navgitaion.navigate("chat")}
+        disabled={loading}
       >
         <Text style={{ fontSize: 16, color: "#fff" }}>Bắt đầu</Text>
       </TouchableOpacity>
