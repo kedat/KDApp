@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 CHAT_BOT_FACE =
   "https://res.cloudinary.com/dknvsbuyy/image/upload/v1685678135/chat_1_c7eda483e3.png";
-baseUrl = "https://43d7-2402-800-61f8-3861-6074-31a5-cd6d-e526.ngrok-free.app";
+baseUrl = "https://aed0-2402-800-61f8-d7d8-2598-41df-7032-2c22.ngrok-free.app";
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);

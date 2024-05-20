@@ -27,7 +27,7 @@ export default function HomeScreen() {
       : setSelectedChatFace(ChatFaceData[0]);
   };
   baseUrl =
-    "https://43d7-2402-800-61f8-3861-6074-31a5-cd6d-e526.ngrok-free.app";
+    "https://aed0-2402-800-61f8-d7d8-2598-41df-7032-2c22.ngrok-free.app";
 
   const [loading, setLoading] = useState(false);
   const onChatFacePress = async (id) => {
